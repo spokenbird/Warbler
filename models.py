@@ -87,6 +87,7 @@ class User(db.Model):
         primaryjoin=(Follows.user_following_id == id),
         secondaryjoin=(Follows.user_being_followed_id == id)
     )
+    # User gives access to user.id
 
     def __repr__(self):
         return f"<User #{self.id}: {self.username}, {self.email}>"
