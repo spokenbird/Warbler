@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, UserEdit
 from models import db, connect_db, User, Message
 
 CURR_USER_KEY = "curr_user"
@@ -20,7 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
-toolbar = DebugToolbarExtension(app)
+# toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
 
@@ -215,7 +215,35 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
+    form = UserEdit(obj=g.user)
+
+    if form.validate_on_submit():
+        user = User.authenticate(g.user.username,
+                                    form.password.data)
+        try:
+            if user:
+                user.username = form.username.data
+                user.email = form.email.data
+                user.image_url = form.image_url.data or user.image_url
+                user.header_image_url = form.header_image_url.data or user.header_image_url
+                user.bio = form.bio.data
+                db.session.add(user)
+                db.session.commit()
+
+                return redirect(f"/users/{g.user.id}")
+
+        except IntegrityError as err:
+            # import pdb; pdb.set_trace()
+            db.session.rollback()
+            if 'email' in str(err):
+                flash("Email is already taken", 'danger')
+            if 'username' in str(err):
+                flash("Username is already taken", 'danger')
+            return render_template('users/edit.html', form=form)
+
+    else:
+        return render_template("/users/edit.html", form=form)
+
 
 
 @app.route('/users/delete', methods=["POST"])

@@ -12,6 +12,9 @@
           {% for error in field.errors %}
             <span class="text-danger">{{ error }}</span>
           {% endfor %}
+
+          {{ field.label }}
+
           {{ field(placeholder=field.label.text, class="form-control") }}
         {% endfor %}
 
@@ -23,7 +26,7 @@
           </span>
           {% endfor %}
         {% endif %}
-        {{ form.password(placeholder="Enter your password to confirm", class="form-control") }}
+        {{ form.password(placeholder="Enter your password to confirm", value="", class="form-control") }}
 
         <div class="edit-btn-area">
           <button class="btn btn-success">Edit this user!</button>
