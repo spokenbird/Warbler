@@ -50,6 +50,11 @@
               <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
               <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
               <p>{{ msg.text }}</p>
+              <form action="">
+                <button type="submit" class="heart-btn">
+                    <i class="far fa-heart text-danger"></i>
+                </button>
+              </form>
             </div>
           </li>
         {% endfor %}

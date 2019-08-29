@@ -272,6 +272,7 @@ nav + .container {
   left: 0;
   right: 0;
   z-index: 1;
+  height: 70%;
 }
 
 #messages .list-group-item a:not(.message-link) {
@@ -287,6 +288,12 @@ nav + .container {
 
 #messages:not(.no-hover) .list-group-item:hover {
   background-color: #e6ecf0;
+}
+
+#messages .heart-btn {
+  background: none;
+  border: none;
+  outline: none;
 }
 
 .bio-container {
