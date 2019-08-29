@@ -107,7 +107,8 @@ class User(db.Model):
         return len(found_user_list) == 1
 
     def user_likes(self, message_id):
-        """Returns true if user has liked a message."""
+        """Converts users liked messages into list.
+        Returns true if user has liked a message."""
 
         liked_messages = [l.message_id for l in self.likes]
         if message_id in liked_messages:
