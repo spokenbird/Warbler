@@ -289,6 +289,10 @@ nav + .container {
   background-color: #e6ecf0;
 }
 
+.bio-container {
+  word-break: break-all;
+}
+
 #sidebar-username {
   margin-top: 30px;
   font-size: 21px;
@@ -317,6 +321,7 @@ nav + .container {
   position: relative;
   background: white;
   margin-top: 20px;
+  overflow: hidden;
 }
 
 .user-card > div {

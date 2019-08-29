@@ -60,7 +60,7 @@ class User(db.Model):
     )
 
     bio = db.Column(
-        db.Text,
+        db.String(100),
     )
 
     location = db.Column(

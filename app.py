@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, DataError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEdit
 from models import db, connect_db, User, Message
@@ -105,7 +105,7 @@ def login():
             return redirect("/")
 
         flash("Invalid credentials.", 'danger')
-    
+
     return render_template('users/login.html', form=form)
 
 
@@ -216,10 +216,9 @@ def profile():
     """Update profile for current user."""
 
     form = UserEdit(obj=g.user)
-
     if form.validate_on_submit():
         user = User.authenticate(g.user.username,
-                                    form.password.data)
+                                 form.password.data)
         try:
             if user:
                 user.username = form.username.data
@@ -231,19 +230,27 @@ def profile():
                 db.session.commit()
 
                 return redirect(f"/users/{g.user.id}")
+            else:
+                flash("Incorrect password", "danger")
+                return render_template("/users/edit.html", form=form)
 
         except IntegrityError as err:
-            # import pdb; pdb.set_trace()
             db.session.rollback()
             if 'email' in str(err):
                 flash("Email is already taken", 'danger')
+                form.email.data = g.user.email
             if 'username' in str(err):
+                form.username.data = g.user.username
                 flash("Username is already taken", 'danger')
             return render_template('users/edit.html', form=form)
 
+        except DataError as err:
+            db.session.rollback()
+            if err:
+                flash("Bio is too long: limit < 100 characters", "danger")
+            return render_template('users/edit.html', form=form)
     else:
         return render_template("/users/edit.html", form=form)
-
 
 
 @app.route('/users/delete', methods=["POST"])
@@ -322,15 +329,17 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of followed_users
     """
-    
+
     if g.user:
+        user_ids = [msg.id for msg in g.user.following] + [g.user.id]
+
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(user_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
-        
-        
+
         return render_template('home.html', messages=messages)
 
     else:
