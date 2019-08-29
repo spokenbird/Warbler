@@ -74,6 +74,8 @@ class User(db.Model):
 
     messages = db.relationship('Message')
 
+    likes = db.relationship('Like')
+
     followers = db.relationship(
         "User",
         secondary="follows",
@@ -104,6 +106,15 @@ class User(db.Model):
         found_user_list = [user for user in self.following if user == other_user]
         return len(found_user_list) == 1
 
+    def user_likes(self, message_id):
+        """Returns true if user has liked a message."""
+
+        liked_messages = [l.message_id for l in self.likes]
+        if message_id in liked_messages:
+            return True
+        else:
+            return False
+        
     @classmethod
     def signup(cls, username, email, password, image_url):
         """Sign up user.
@@ -172,6 +183,22 @@ class Message(db.Model):
     )
 
     user = db.relationship('User')
+
+
+class Like(db.Model):
+    """Likes on messages <3"""
+
+    __tablename__ = 'likes'
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        primary_key=True)
+
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id', ondelete='CASCADE'),
+        primary_key=True)
 
 
 def connect_db(app):

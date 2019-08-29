@@ -5,7 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError, DataError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEdit
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Like
 
 CURR_USER_KEY = "curr_user"
 
@@ -319,6 +319,22 @@ def messages_destroy(message_id):
 
 
 ##############################################################################
+# Likes
+@app.route('/like', methods=['POST'])
+def like():
+    """Liking a message."""
+
+    like = Like(
+        user_id=request.form['like_user_id'],
+        message_id=request.form['like_message_id']
+    )
+    import pdb; pdb.set_trace()
+    db.session.add(like)
+    db.session.commit()
+    
+    return redirect(f'{request.url_root}')
+
+##############################################################################
 # Homepage and error pages
 
 
@@ -340,7 +356,7 @@ def homepage():
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages)
+        return render_template('home.html', messages=messages, )
 
     else:
         return render_template('home-anon.html')
