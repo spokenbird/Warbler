@@ -76,6 +76,8 @@ class User(db.Model):
 
     likes = db.relationship('Like')
 
+    liked_messages = db.relationship('Message', secondary='likes')
+
     followers = db.relationship(
         "User",
         secondary="follows",
@@ -111,10 +113,8 @@ class User(db.Model):
         Returns true if user has liked a message."""
 
         liked_messages = [l.message_id for l in self.likes]
-        if message_id in liked_messages:
-            return True
-        else:
-            return False
+        return message_id in liked_messages
+    
         
     @classmethod
     def signup(cls, username, email, password, image_url):

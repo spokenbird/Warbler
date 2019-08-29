@@ -146,6 +146,8 @@ def users_show(user_id):
 
     user = User.query.get_or_404(user_id)
 
+    likes = len(user.likes)
+
     # snagging messages in order from the database;
     # user.messages won't be in order by default
     messages = (Message
@@ -154,31 +156,46 @@ def users_show(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
-    return render_template('users/show.html', user=user, messages=messages)
+    return render_template('users/show.html', user=user, messages=messages, total_likes=likes)
+
+
+@app.route('/users/<int:user_id>/likes')
+def show_liked_messages(user_id):
+    """Show only messages that user has liked"""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    messages = user.liked_messages
+    likes = len(messages)
+
+    return render_template('users/show.html', user=user, messages=messages, total_likes=likes)
 
 
 @app.route('/users/<int:user_id>/following')
 def show_following(user_id):
     """Show list of people this user is following."""
-
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/following.html', user=user)
+    likes = len(user.likes)
+
+    return render_template('users/following.html', user=user, total_likes=likes)
 
 
 @app.route('/users/<int:user_id>/followers')
 def users_followers(user_id):
     """Show list of followers of this user."""
-
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/followers.html', user=user)
+    likes = len(user.likes)
+    return render_template('users/followers.html', user=user, total_likes=likes)
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
@@ -323,16 +340,27 @@ def messages_destroy(message_id):
 @app.route('/like', methods=['POST'])
 def like():
     """Liking a message."""
+    message_id = request.form.get('like_message_id', type=int)
+    user_id = request.form.get('like_user_id', type=int)
 
-    like = Like(
-        user_id=request.form['like_user_id'],
-        message_id=request.form['like_message_id']
-    )
-    import pdb; pdb.set_trace()
-    db.session.add(like)
-    db.session.commit()
-    
-    return redirect(f'{request.url_root}')
+    if g.user.user_likes(message_id):
+        like = Like.query.filter(
+            user_id == Like.user_id, message_id == Like.message_id).first()
+
+        db.session.delete(like)
+        db.session.commit()
+
+        return redirect(f'{request.url_root}')
+    else:
+        like = Like(
+            user_id=user_id,
+            message_id=message_id
+        )
+
+        db.session.add(like)
+        db.session.commit()
+
+        return redirect(f'{request.url_root}')
 
 ##############################################################################
 # Homepage and error pages
