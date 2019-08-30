@@ -192,7 +192,8 @@ def users_followers(user_id):
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-
+    import pdb
+    pdb.set_trace()
     user = User.query.get_or_404(user_id)
     likes = len(user.likes)
     return render_template('users/followers.html', user=user, total_likes=likes)

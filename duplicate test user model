@@ -9,6 +9,7 @@ from app import app
 import os
 from unittest import TestCase
 
+
 from models import db, User, Message, Follows
 
 # BEFORE we import our app, let's set an environmental variable
@@ -57,7 +58,7 @@ class UserModelTestCase(TestCase):
         self.assertEqual(len(u.messages), 0)
         self.assertEqual(len(u.followers), 0)
 
-    def test_repr_model(self):
+    def repr_test(self):
         """Testing repr return"""
 
         u = User(
@@ -68,56 +69,17 @@ class UserModelTestCase(TestCase):
 
         db.session.add(u)
         db.session.commit()
-        self.assertIn("test@test.com", u.__repr__())
 
-    def test_is_following(self):
-        """Tests if one user is following another"""
+        self.assertEqual("test@test.com" in u.__repr__)
 
-        u1 = User(
-            email="test@test1.com",
-            username="testuser1",
-            password="HASHED_PASSWORD"
-        )
+    # def test_follow_model(self):
+    #     """Does the user have followers"""
 
-        u2 = User(
-            email="test@test2.com",
-            username="testuser2",
-            password="HASHED_PASSWORD"
-        )
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.commit()
+    #     user = User.query.get(1)
 
-        follows = Follows(
-            user_being_followed_id=u1.id,
-            user_following_id=u2.id
-        )
+    #     import pdb; pdb.set_trace()
 
-        db.session.add(follows)
-        db.session.commit()
+    #     db.session.add(user)
+    #     db.session.commit()
 
-        self.assertTrue(u2.is_following(u1))
-
-    def test_is_not_following(self):
-        """Tests if user is not following another user"""
-
-        u1 = User(
-            email="test@test1.com",
-            username="testuser1",
-            password="HASHED_PASSWORD"
-        )
-
-        u2 = User(
-            email="test@test2.com",
-            username="testuser2",
-            password="HASHED_PASSWORD"
-        )
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.commit()
-
-        self.assertFalse(u2.is_following(u1))
-
-    
-
-        
+    #     self.assertEqual(len(user.followers), 26)
