@@ -156,7 +156,8 @@ def users_show(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
-    return render_template('users/show.html', user=user, messages=messages, total_likes=likes)
+    return render_template('users/show.html', user=user, messages=messages, 
+                           total_likes=likes)
 
 
 @app.route('/users/<int:user_id>/likes')
@@ -170,7 +171,8 @@ def show_liked_messages(user_id):
     messages = user.liked_messages
     likes = len(messages)
 
-    return render_template('users/show.html', user=user, messages=messages, total_likes=likes)
+    return render_template('users/show.html', user=user, messages=messages,
+                           total_likes=likes)
 
 
 @app.route('/users/<int:user_id>/following')
@@ -183,7 +185,8 @@ def show_following(user_id):
     user = User.query.get_or_404(user_id)
     likes = len(user.likes)
 
-    return render_template('users/following.html', user=user, total_likes=likes)
+    return render_template('users/following.html', user=user, 
+                           total_likes=likes)
 
 
 @app.route('/users/<int:user_id>/followers')
@@ -196,7 +199,8 @@ def users_followers(user_id):
     pdb.set_trace()
     user = User.query.get_or_404(user_id)
     likes = len(user.likes)
-    return render_template('users/followers.html', user=user, total_likes=likes)
+    return render_template('users/followers.html', user=user, 
+                           total_likes=likes)
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
@@ -242,7 +246,8 @@ def profile():
                 user.username = form.username.data
                 user.email = form.email.data
                 user.image_url = form.image_url.data or user.image_url
-                user.header_image_url = form.header_image_url.data or user.header_image_url
+                user.header_image_url = form.header_image_url.data or \
+                    user.header_image_url
                 user.bio = form.bio.data
                 db.session.add(user)
                 db.session.commit()

@@ -8,7 +8,7 @@
 from app import app
 import os
 from unittest import TestCase
-
+from flask_bcrypt import Bcrypt
 from models import db, User, Message, Follows
 
 # BEFORE we import our app, let's set an environmental variable
@@ -17,6 +17,10 @@ from models import db, User, Message, Follows
 # connected to the database
 
 os.environ['DATABASE_URL'] = "postgresql:///warbler-test"
+
+bcrypt = Bcrypt()
+password = 'test'
+hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
 
 
 # Now we can import app
@@ -118,6 +122,96 @@ class UserModelTestCase(TestCase):
 
         self.assertFalse(u2.is_following(u1))
 
-    
+    def test_is_followed_by(self):
+        """Tests that the one user is followed by another"""
 
-        
+        u1 = User(
+            email="test@test1.com",
+            username="testuser1",
+            password="HASHED_PASSWORD"
+        )
+
+        u2 = User(
+            email="test@test2.com",
+            username="testuser2",
+            password="HASHED_PASSWORD"
+        )
+        db.session.add(u1)
+        db.session.add(u2)
+        db.session.commit()
+
+        follows = Follows(
+            user_being_followed_id=u1.id,
+            user_following_id=u2.id
+        )
+        db.session.add(follows)
+        db.session.commit()
+
+        self.assertTrue(u1.is_followed_by(u2))
+
+    def test_is_not_followed_by(self):
+        """Tests that one user is not followed by the other"""
+
+        u1 = User(
+            email="test@test1.com",
+            username="testuser1",
+            password="HASHED_PASSWORD"
+        )
+
+        u2 = User(
+            email="test@test2.com",
+            username="testuser2",
+            password="HASHED_PASSWORD"
+        )
+        db.session.add(u1)
+        db.session.add(u2)
+        db.session.commit()
+
+        follows = Follows(
+            user_being_followed_id=u2.id,
+            user_following_id=u1.id
+        )
+        db.session.add(follows)
+        db.session.commit()
+
+        self.assertFalse(u1.is_followed_by(u2))
+
+    def test_user_signup_successfully_creates_user(self):
+        """Tests that the class method 'signup' successfully creates a new instance
+        of the user class."""
+
+        User.signup('TestyMan', 'test@test.com', 'testing',
+                    'https://www.thewrap.com/wp-content/uploads/2018/09/Maniac-3.jpg')
+        db.session.commit()
+
+        successful_user = User.query.filter(
+            User.username == 'TestyMan').first()
+
+        self.assertIsInstance(successful_user, User)
+
+    def test_user_signup_fails_on_invalid_critera(self):
+        """Tests that the class method 'signup' successfully creates a new instance
+        of the user class."""
+
+        with self.assertRaises(TypeError):
+            User.signup('TestyMcTesterson')
+
+    def test_authenticates_successfuly(self):
+        """Tests that the User.authenticate method successfully authenticates a user."""
+
+        User.signup('TestyMan', 'test@test.com', 'testing',
+                    'https://www.thewrap.com/wp-content/uploads/2018/09/Maniac-3.jpg')
+
+        db.session.commit()
+
+        self.assertTrue(User.authenticate("TestyMan", "testing"))
+
+    def test_does_not_authenticate_invalid_user(self):
+        """Tests that the User.authenticate method successfully authenticates a user."""
+
+        User.signup('TestyMan', 'test@test.com', 'testing',
+                    'https://www.thewrap.com/wp-content/uploads/2018/09/Maniac-3.jpg')
+
+        db.session.commit()
+
+        self.assertFalse(User.authenticate("TestyMan", "tessst"))
