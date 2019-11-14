@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask, render_template, request, flash, redirect, session, g
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError, DataError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEdit
@@ -156,7 +156,7 @@ def users_show(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
-    return render_template('users/show.html', user=user, messages=messages, 
+    return render_template('users/show.html', user=user, messages=messages,
                            total_likes=likes)
 
 
@@ -185,7 +185,7 @@ def show_following(user_id):
     user = User.query.get_or_404(user_id)
     likes = len(user.likes)
 
-    return render_template('users/following.html', user=user, 
+    return render_template('users/following.html', user=user,
                            total_likes=likes)
 
 
@@ -199,7 +199,7 @@ def users_followers(user_id):
     pdb.set_trace()
     user = User.query.get_or_404(user_id)
     likes = len(user.likes)
-    return render_template('users/followers.html', user=user, 
+    return render_template('users/followers.html', user=user,
                            total_likes=likes)
 
 
